@@ -40,35 +40,65 @@
   </head>
 
   <body class="services-page">
-    <header
-      id="header"
-      class="header d-flex align-items-center position-relative"
+    <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    .logo-text {
+      font-weight: bold;
+      color: #000;
+      font-size: 20px; /* Desktop */
+      white-space: nowrap; /* Prevent line break */
+    }
+
+    /* Tablet */
+    @media (max-width: 768px) {
+      .logo-text {
+        font-size: 16px;
+      }
+    }
+
+    /* Small Mobile */
+    @media (max-width: 480px) {
+      .logo-text {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+
+<body class="services-page">
+  <header
+    id="header"
+    class="header d-flex align-items-center position-relative"
+  >
+    <div
+      class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between"
     >
-      <div
-        class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between"
-      >
-        <a href="index.html" class="logo d-flex align-items-center">
-          <!-- Logo Image -->
-          <img
-            src="assets/img/Department_of_Agriculture_of_the_Philippines.svg.png"
-            alt="DA PREC STA.BARBARA"
-            style="height: 60px; width: auto; margin-right: 10px"
-          />
-          <!-- Text next to logo -->
-          <span style="font-weight: bold; font-size: 20px; color: #000">
-            PREC STA. BARBARA
-          </span>
+      <a href="index.html" class="logo d-flex align-items-center">
+        <!-- Logo Image -->
+        <img
+          src="assets/img/Department_of_Agriculture_of_the_Philippines.svg.png"
+          alt="DA PREC STA.BARBARA"
+          style="height: 60px; width: auto; margin-right: 10px"
+        />
+
+        <!-- Responsive Text -->
+        <span class="logo-text">
+          PREC STA. BARBARA
+        </span>
+      </a>
+
+      <nav id="navmenu" class="navmenu d-flex align-items-center">
+        <a href="services.html" class="back-link">
+          <i class="bi bi-arrow-left"></i>
+          <span class="back-text">Back to Products</span>
         </a>
+      </nav>
+    </div>
+  </header>
 
-          <nav id="navmenu" class="navmenu d-flex align-items-center">
-              <a href="services.html" class="back-link">
-                  <i class="bi bi-arrow-left"></i>
-                  <span class="back-text">Back to Products</span>
-              </a>
-          </nav>
-    </header>
-
-    <main class="main" style="background-color:#145a32;">
+  <main class="main" style="background-color:#145a32;">
 
   <!-- HERO -->
   <section class="container py-5">
@@ -152,8 +182,6 @@
               </a>
               <div class="footer-contact pt-3">
                 <p>Brgy. Tebag East, Sta. Barbara, Pangasinan</p>
-                  <strong>Phone:</strong> <span>+1 5589 55488 55</span>
-                </p>
                 <p><strong>Email:</strong> <span>daprecsb@gmail.com</span></p>
               </div>
             </div>
@@ -164,8 +192,9 @@
                 <li><a href="index.html">Home</a></li>
                 <li><a href="about.html">About us</a></li>
                 <li><a href="services.html">Products</a></li>
+                <li><a href="services.html">Achievement</a></li>
+                <li><a href="contact.html">Contact us</a></li>
                 <li><a href="privacy_policy.html">Privacy policy</a></li>
-                <li><a href="prayer.html">Prayer</a></li>
               </ul>
             </div>
             <!--
@@ -197,13 +226,6 @@
               <strong><span>DA-PRECSB 2026</span></strong
               >. All Rights Reserved
             </div>
-          </div>
-
-          <div class="social-links order-first order-lg-last mb-3 mb-lg-0">
-            <a href=""><i class="bi bi-twitter-x"></i></a>
-            <a href=""><i class="bi bi-facebook"></i></a>
-            <a href=""><i class="bi bi-instagram"></i></a>
-            <a href=""><i class="bi bi-linkedin"></i></a>
           </div>
         </div>
       </div>
