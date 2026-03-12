@@ -14,20 +14,20 @@ app.post("/send", async (req, res) => {
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-      user: "chca.repato.up@phinmaed.com", // CHANGE IF NEEDED
-      pass: "eudealzoqoftnpye", // PUT YOUR APP PASSWORD HERE
+      user: "daprecsb@gmail.com", // CHANGE IF NEEDED
+      pass: "dfzpgnpcyvbtnzlr", // PUT YOUR APP PASSWORD HERE
     },
   });
 
   try {
     await transporter.sendMail({
-      from: `"DA-PREC Contact" <chca.repato.up@phinmaed.com>`,
-      to: "chca.repato.up@phinmaed.com",
+      from: `"DA-PREC Contact" <daprecsb@gmail.com>`,
+      to: "daprecsb@gmail.com",
       replyTo: email,
       subject: subject,
       text: `
 Name: ${name}
-Email: ${email}
+Email By: ${email}
 
 Message:
 ${message}
