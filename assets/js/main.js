@@ -191,7 +191,7 @@
 
   /**
    * DA-PREC Auto-Speech, White Text Animation & Voice Controls
-   */
+   
   function initAboutSpeech() {
     const contentDiv = document.getElementById("about-content");
     if (!contentDiv) return;
@@ -296,4 +296,5 @@
   }
 
   window.addEventListener("load", initAboutSpeech);
+  */
 })();
