@@ -56,10 +56,51 @@
         border-radius: 10px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
       }
+
+      /* 🔔 TOAST */
+      .toast-custom {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 16px 22px;
+        border-radius: 12px;
+        color: white;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        backdrop-filter: blur(10px);
+        transform: translateX(120%) scale(0.9);
+        opacity: 0;
+        transition: all 0.4s ease;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        z-index: 9999;
+      }
+
+      .toast-show {
+        transform: translateX(0) scale(1);
+        opacity: 1;
+      }
+
+      .toast-success {
+        background: rgba(40, 167, 69, 0.95);
+      }
+
+      .toast-delete {
+        background: rgba(220, 53, 69, 0.95);
+      }
+
+      .toast-error {
+        background: rgba(255, 193, 7, 0.95);
+        color: black;
+      }
     </style>
   </head>
 
   <body>
+    <!-- 🔔 TOAST -->
+    <div id="toast" class="toast-custom"></div>
+
     <!-- SIDEBAR -->
     <div class="sidebar">
       <h4>Admin Panel</h4>
@@ -93,7 +134,7 @@
       </div>
     </div>
 
-    <!-- CREATE / EDIT MODAL -->
+    <!-- CREATE MODAL -->
     <div class="modal fade" id="heroModal">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -132,9 +173,19 @@
             <input
               type="password"
               id="deletePassword"
-              class="form-control"
+              class="form-control mb-2"
               placeholder="Enter password"
             />
+
+            <!-- 👁️ SHOW PASSWORD -->
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                onclick="toggleDeletePassword()"
+              />
+              <label class="form-check-label">Show Password</label>
+            </div>
           </div>
 
           <div class="modal-footer">
@@ -151,7 +202,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- 🔓 LOGOUT FUNCTION -->
+    <!-- 🔓 LOGOUT -->
     <script>
       function logout() {
         localStorage.removeItem("isLoggedIn");
@@ -175,31 +226,34 @@
 
         heroes.forEach((hero, index) => {
           table.innerHTML += `
-          <tr>
-            <td><img src="${hero.image}" width="100"></td>
-            <td>${hero.desc}</td>
-            <td>
-              <button class="btn btn-sm btn-success" onclick="editHero(${index})">Edit</button>
-              <button class="btn btn-sm btn-danger" onclick="askDelete(${index})">Delete</button>
-            </td>
-          </tr>
-        `;
+            <tr>
+              <td><img src="${hero.image}" width="100"></td>
+              <td>${hero.desc}</td>
+              <td>
+                <button class="btn btn-sm btn-success" onclick="editHero(${index})">Edit</button>
+                <button class="btn btn-sm btn-danger" onclick="askDelete(${index})">Delete</button>
+              </td>
+            </tr>
+          `;
         });
       }
 
       function openCreate() {
         editIndex = null;
-        document.getElementById("descInput").value = "";
-        document.getElementById("imageInput").value = "";
-        document.getElementById("modalTitle").innerText = "Create Hero";
+        descInput.value = "";
+        imageInput.value = "";
+        modalTitle.innerText = "Create Hero";
         modal.show();
       }
 
       function saveHero() {
-        const file = document.getElementById("imageInput").files[0];
-        const desc = document.getElementById("descInput").value;
+        const file = imageInput.files[0];
+        const desc = descInput.value;
 
-        if (!desc) return alert("Description required");
+        if (!desc) {
+          showToast("Description required!", "error");
+          return;
+        }
 
         if (file) {
           const reader = new FileReader();
@@ -208,8 +262,10 @@
 
             if (editIndex === null) {
               heroes.push({ image: img, desc });
+              showToast("Hero successfully created!", "success");
             } else {
               heroes[editIndex] = { image: img, desc };
+              showToast("Hero updated!", "success");
             }
 
             renderTable();
@@ -217,33 +273,60 @@
           };
           reader.readAsDataURL(file);
         } else {
-          alert("Image required");
+          showToast("Image required!", "error");
         }
       }
 
       function editHero(index) {
         editIndex = index;
-        document.getElementById("descInput").value = heroes[index].desc;
-        document.getElementById("modalTitle").innerText = "Edit Hero";
+        descInput.value = heroes[index].desc;
+        modalTitle.innerText = "Edit Hero";
         modal.show();
       }
 
       function askDelete(index) {
         deleteIndex = index;
-        document.getElementById("deletePassword").value = "";
+        deletePassword.value = "";
         deleteModal.show();
       }
 
       function confirmDelete() {
-        const password = document.getElementById("deletePassword").value;
+        const password = deletePassword.value;
 
         if (password === "admin123") {
           heroes.splice(deleteIndex, 1);
           renderTable();
           deleteModal.hide();
+          showToast("Hero successfully deleted!", "delete");
         } else {
-          alert("Wrong password!");
+          showToast("Wrong password!", "error");
         }
+      }
+
+      function toggleDeletePassword() {
+        const input = document.getElementById("deletePassword");
+        input.type = input.type === "password" ? "text" : "password";
+      }
+
+      function showToast(message, type) {
+        const toast = document.getElementById("toast");
+
+        toast.className = "toast-custom";
+
+        if (type === "success") toast.classList.add("toast-success");
+        else if (type === "delete") toast.classList.add("toast-delete");
+        else toast.classList.add("toast-error");
+
+        toast.innerHTML =
+          (type === "success" ? "✅" : type === "delete" ? "🗑️" : "⚠️") +
+          " " +
+          message;
+
+        setTimeout(() => toast.classList.add("toast-show"), 50);
+
+        setTimeout(() => {
+          toast.classList.remove("toast-show");
+        }, 2500);
       }
     </script>
   </body>

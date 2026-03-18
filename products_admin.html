@@ -47,7 +47,6 @@
         background: #2f4f1f;
         color: white;
       }
-
       .btn-green:hover {
         background: #3d6b28;
       }
@@ -56,10 +55,48 @@
         border-radius: 10px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
       }
+
+      /* 🔔 TOAST */
+      .toast-custom {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 16px 22px;
+        border-radius: 12px;
+        color: white;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        backdrop-filter: blur(10px);
+        transform: translateX(120%) scale(0.9);
+        opacity: 0;
+        transition: all 0.4s ease;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        z-index: 9999;
+      }
+
+      .toast-show {
+        transform: translateX(0) scale(1);
+        opacity: 1;
+      }
+      .toast-success {
+        background: rgba(40, 167, 69, 0.95);
+      }
+      .toast-delete {
+        background: rgba(220, 53, 69, 0.95);
+      }
+      .toast-error {
+        background: rgba(255, 193, 7, 0.95);
+        color: black;
+      }
     </style>
   </head>
 
   <body>
+    <!-- 🔔 TOAST -->
+    <div id="toast" class="toast-custom"></div>
+
     <!-- SIDEBAR -->
     <div class="sidebar">
       <h4>Admin Panel</h4>
@@ -139,9 +176,18 @@
             <input
               type="password"
               id="deletePassword"
-              class="form-control"
+              class="form-control mb-2"
               placeholder="Enter password"
             />
+            <!-- 👁️ SHOW PASSWORD -->
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                onclick="toggleDeletePassword()"
+              />
+              <label class="form-check-label">Show Password</label>
+            </div>
           </div>
 
           <div class="modal-footer">
@@ -158,15 +204,13 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- 🔓 LOGOUT FUNCTION -->
     <script>
+      // 🔓 LOGOUT
       function logout() {
         localStorage.removeItem("isLoggedIn");
         window.location.href = "login.html";
       }
-    </script>
 
-    <script>
       let products = [];
       let editIndex = null;
       let deleteIndex = null;
@@ -184,16 +228,16 @@
 
         products.forEach((p, index) => {
           table.innerHTML += `
-          <tr>
-            <td><strong>${p.title}</strong></td>
-            <td>${p.desc}</td>
-            <td><img src="${p.image}" width="100"></td>
-            <td>
-              <button class="btn btn-sm btn-success" onclick="editProduct(${index})">Edit</button>
-              <button class="btn btn-sm btn-danger" onclick="askDelete(${index})">Delete</button>
-            </td>
-          </tr>
-        `;
+            <tr>
+              <td><strong>${p.title}</strong></td>
+              <td>${p.desc}</td>
+              <td><img src="${p.image}" width="100"></td>
+              <td>
+                <button class="btn btn-sm btn-success" onclick="editProduct(${index})">Edit</button>
+                <button class="btn btn-sm btn-danger" onclick="askDelete(${index})">Delete</button>
+              </td>
+            </tr>
+          `;
         });
       }
 
@@ -207,29 +251,29 @@
       }
 
       function saveProduct() {
-        const title = titleInput.value;
-        const desc = descInput.value;
+        const title = titleInput.value.trim();
+        const desc = descInput.value.trim();
         const file = imageInput.files[0];
 
-        if (!title || !desc) return alert("All fields required");
+        if (!title || !desc) return showToast("All fields required!", "error");
 
         if (file) {
           const reader = new FileReader();
           reader.onload = function (e) {
             const img = e.target.result;
-
             if (editIndex === null) {
               products.push({ title, desc, image: img });
+              showToast("Product successfully created!", "success");
             } else {
               products[editIndex] = { title, desc, image: img };
+              showToast("Product updated!", "success");
             }
-
             renderTable();
             modal.hide();
           };
           reader.readAsDataURL(file);
         } else {
-          alert("Image required");
+          showToast("Image required!", "error");
         }
       }
 
@@ -249,14 +293,34 @@
 
       function confirmDelete() {
         const password = deletePassword.value;
-
         if (password === "admin123") {
           products.splice(deleteIndex, 1);
           renderTable();
           deleteModal.hide();
+          showToast("Product successfully deleted!", "delete");
         } else {
-          alert("Wrong password!");
+          showToast("Wrong password!", "error");
         }
+      }
+
+      function toggleDeletePassword() {
+        const input = document.getElementById("deletePassword");
+        input.type = input.type === "password" ? "text" : "password";
+      }
+
+      function showToast(message, type) {
+        const toast = document.getElementById("toast");
+        toast.className = "toast-custom";
+        if (type === "success") toast.classList.add("toast-success");
+        else if (type === "delete") toast.classList.add("toast-delete");
+        else toast.classList.add("toast-error");
+
+        toast.innerHTML =
+          (type === "success" ? "✅" : type === "delete" ? "🗑️" : "⚠️") +
+          " " +
+          message;
+        setTimeout(() => toast.classList.add("toast-show"), 50);
+        setTimeout(() => toast.classList.remove("toast-show"), 2500);
       }
     </script>
   </body>

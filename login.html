@@ -12,7 +12,7 @@
 
     <style>
       body {
-        background: #2f4f1f;
+        background: linear-gradient(135deg, #2f4f1f, #3d6b28);
         display: flex;
         justify-content: center;
         align-items: center;
@@ -20,23 +20,93 @@
       }
 
       .login-card {
-        width: 350px;
+        width: 360px;
         padding: 30px;
-        border-radius: 10px;
+        border-radius: 15px;
         background: white;
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+        text-align: center;
+        animation: fadeIn 0.6s ease;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .logo {
+        width: 80px;
+        margin-bottom: 10px;
       }
 
       .btn-green {
         background: #2f4f1f;
         color: white;
+        transition: 0.3s;
+      }
+
+      .btn-green:hover {
+        background: #3d6b28;
+      }
+
+      /* 🔔 TOAST */
+      .toast-custom {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 16px 22px;
+        border-radius: 12px;
+        color: white;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        backdrop-filter: blur(10px);
+        transform: translateX(120%) scale(0.9);
+        opacity: 0;
+        transition: all 0.4s ease;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      }
+
+      .toast-show {
+        transform: translateX(0) scale(1);
+        opacity: 1;
+      }
+
+      .toast-success {
+        background: rgba(40, 167, 69, 0.95);
+      }
+
+      .toast-error {
+        background: rgba(220, 53, 69, 0.95);
+      }
+
+      /* Spinner */
+      .spinner-border-sm {
+        width: 1rem;
+        height: 1rem;
       }
     </style>
   </head>
 
   <body>
+    <!-- 🔔 TOAST -->
+    <div id="toast" class="toast-custom"></div>
+
     <div class="login-card">
-      <h3 class="text-center mb-4">Admin Login</h3>
+      <!-- LOGO -->
+      <img
+        src="assets/img/Department_of_Agriculture_of_the_Philippines.svg.png"
+        class="logo"
+      />
+
+      <h4 class="mb-3">Admin Login</h4>
 
       <input
         type="text"
@@ -44,6 +114,7 @@
         class="form-control mb-3"
         placeholder="Username"
       />
+
       <input
         type="password"
         id="password"
@@ -51,36 +122,70 @@
         placeholder="Password"
       />
 
-      <!-- Show password checkbox -->
-      <div class="form-check mb-3">
+      <div class="form-check mb-3 text-start">
         <input
           class="form-check-input"
           type="checkbox"
-          id="showPassword"
           onclick="togglePassword()"
         />
-        <label class="form-check-label" for="showPassword">Show Password</label>
+        <label class="form-check-label">Show Password</label>
       </div>
 
-      <button class="btn btn-green w-100" onclick="login()">Login</button>
+      <button id="loginBtn" class="btn btn-green w-100" onclick="login()">
+        Login
+      </button>
     </div>
 
     <script>
       function login() {
         const user = document.getElementById("username").value;
         const pass = document.getElementById("password").value;
+        const btn = document.getElementById("loginBtn");
 
-        if (user === "admin" && pass === "admin123") {
-          localStorage.setItem("isLoggedIn", "true");
-          window.location.href = "admin.html";
-        } else {
-          alert("Invalid credentials");
-        }
+        // 🔄 Loading state
+        btn.innerHTML =
+          '<span class="spinner-border spinner-border-sm"></span> Logging in...';
+        btn.disabled = true;
+
+        setTimeout(() => {
+          if (user === "admin" && pass === "admin123") {
+            localStorage.setItem("isLoggedIn", "true");
+            localStorage.setItem("username", user);
+
+            showToast("Login successful!", "success");
+
+            setTimeout(() => {
+              window.location.href = "admin.html";
+            }, 1500);
+          } else {
+            showToast("Invalid username or password", "error");
+
+            btn.innerHTML = "Login";
+            btn.disabled = false;
+          }
+        }, 800); // simulate processing
       }
 
       function togglePassword() {
         const passInput = document.getElementById("password");
         passInput.type = passInput.type === "password" ? "text" : "password";
+      }
+
+      function showToast(message, type) {
+        const toast = document.getElementById("toast");
+
+        toast.className = "toast-custom"; // reset
+        toast.classList.add(
+          type === "success" ? "toast-success" : "toast-error",
+        );
+
+        toast.innerHTML = (type === "success" ? "✅" : "❌") + " " + message;
+
+        setTimeout(() => toast.classList.add("toast-show"), 50);
+
+        setTimeout(() => {
+          toast.classList.remove("toast-show");
+        }, 2500);
       }
     </script>
   </body>
