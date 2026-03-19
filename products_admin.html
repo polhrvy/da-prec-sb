@@ -131,7 +131,7 @@
       </div>
     </div>
 
-    <!-- CREATE / EDIT MODAL -->
+    <!-- CREATE MODAL -->
     <div class="modal fade" id="productModal">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -178,8 +178,13 @@
               id="deletePassword"
               class="form-control mb-2"
               placeholder="Enter password"
+              onkeydown="
+                if (event.key === 'Enter') {
+                  event.preventDefault();
+                  confirmDelete();
+                }
+              "
             />
-            <!-- 👁️ SHOW PASSWORD -->
             <div class="form-check">
               <input
                 class="form-check-input"
@@ -205,10 +210,13 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-      // 🔓 LOGOUT
+      // 🔓 LOGOUT WITH NOTIFICATION
       function logout() {
-        localStorage.removeItem("isLoggedIn");
-        window.location.href = "login.html";
+        showToast("✅ Logged out successfully!", "success");
+        setTimeout(() => {
+          localStorage.removeItem("isLoggedIn");
+          window.location.href = "login.html";
+        }, 1200);
       }
 
       let products = [];
@@ -255,25 +263,28 @@
         const desc = descInput.value.trim();
         const file = imageInput.files[0];
 
-        if (!title || !desc) return showToast("All fields required!", "error");
+        if (!title || !desc)
+          return showToast("⚠️ All fields required!", "error");
 
         if (file) {
           const reader = new FileReader();
           reader.onload = function (e) {
             const img = e.target.result;
+
             if (editIndex === null) {
               products.push({ title, desc, image: img });
-              showToast("Product successfully created!", "success");
+              showToast("✅ Product created!", "success");
             } else {
               products[editIndex] = { title, desc, image: img };
-              showToast("Product updated!", "success");
+              showToast("✅ Product updated!", "success");
             }
+
             renderTable();
             modal.hide();
           };
           reader.readAsDataURL(file);
         } else {
-          showToast("Image required!", "error");
+          showToast("⚠️ Image required!", "error");
         }
       }
 
@@ -289,17 +300,20 @@
         deleteIndex = index;
         deletePassword.value = "";
         deleteModal.show();
+
+        setTimeout(() => deletePassword.focus(), 300);
       }
 
       function confirmDelete() {
         const password = deletePassword.value;
+
         if (password === "admin123") {
           products.splice(deleteIndex, 1);
           renderTable();
           deleteModal.hide();
-          showToast("Product successfully deleted!", "delete");
+          showToast("🗑️ Product deleted!", "delete");
         } else {
-          showToast("Wrong password!", "error");
+          showToast("⚠️ Wrong password!", "error");
         }
       }
 
@@ -311,14 +325,13 @@
       function showToast(message, type) {
         const toast = document.getElementById("toast");
         toast.className = "toast-custom";
+
         if (type === "success") toast.classList.add("toast-success");
         else if (type === "delete") toast.classList.add("toast-delete");
         else toast.classList.add("toast-error");
 
-        toast.innerHTML =
-          (type === "success" ? "✅" : type === "delete" ? "🗑️" : "⚠️") +
-          " " +
-          message;
+        toast.innerHTML = message;
+
         setTimeout(() => toast.classList.add("toast-show"), 50);
         setTimeout(() => toast.classList.remove("toast-show"), 2500);
       }

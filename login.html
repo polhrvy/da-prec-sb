@@ -87,7 +87,6 @@
         background: rgba(220, 53, 69, 0.95);
       }
 
-      /* Spinner */
       .spinner-border-sm {
         width: 1rem;
         height: 1rem;
@@ -100,7 +99,6 @@
     <div id="toast" class="toast-custom"></div>
 
     <div class="login-card">
-      <!-- LOGO -->
       <img
         src="assets/img/Department_of_Agriculture_of_the_Philippines.svg.png"
         class="logo"
@@ -108,41 +106,51 @@
 
       <h4 class="mb-3">Admin Login</h4>
 
-      <input
-        type="text"
-        id="username"
-        class="form-control mb-3"
-        placeholder="Username"
-      />
-
-      <input
-        type="password"
-        id="password"
-        class="form-control mb-2"
-        placeholder="Password"
-      />
-
-      <div class="form-check mb-3 text-start">
+      <!-- ✅ FORM ADDED -->
+      <form id="loginForm">
         <input
-          class="form-check-input"
-          type="checkbox"
-          onclick="togglePassword()"
+          type="text"
+          id="username"
+          class="form-control mb-3"
+          placeholder="Username"
         />
-        <label class="form-check-label">Show Password</label>
-      </div>
 
-      <button id="loginBtn" class="btn btn-green w-100" onclick="login()">
-        Login
-      </button>
+        <input
+          type="password"
+          id="password"
+          class="form-control mb-2"
+          placeholder="Password"
+        />
+
+        <div class="form-check mb-3 text-start">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            onclick="togglePassword()"
+          />
+          <label class="form-check-label">Show Password</label>
+        </div>
+
+        <button id="loginBtn" type="submit" class="btn btn-green w-100">
+          Login
+        </button>
+      </form>
     </div>
 
     <script>
+      // ✅ HANDLE ENTER KEY SUBMIT
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault(); // prevent reload
+          login();
+        });
+
       function login() {
         const user = document.getElementById("username").value;
         const pass = document.getElementById("password").value;
         const btn = document.getElementById("loginBtn");
 
-        // 🔄 Loading state
         btn.innerHTML =
           '<span class="spinner-border spinner-border-sm"></span> Logging in...';
         btn.disabled = true;
@@ -163,7 +171,7 @@
             btn.innerHTML = "Login";
             btn.disabled = false;
           }
-        }, 800); // simulate processing
+        }, 800);
       }
 
       function togglePassword() {
@@ -174,7 +182,7 @@
       function showToast(message, type) {
         const toast = document.getElementById("toast");
 
-        toast.className = "toast-custom"; // reset
+        toast.className = "toast-custom";
         toast.classList.add(
           type === "success" ? "toast-success" : "toast-error",
         );
@@ -186,6 +194,14 @@
         setTimeout(() => {
           toast.classList.remove("toast-show");
         }, 2500);
+      }
+
+      // ✅ SHOW LOGOUT MESSAGE
+      const logoutMessage = localStorage.getItem("logoutMessage");
+
+      if (logoutMessage) {
+        showToast(logoutMessage, "success");
+        localStorage.removeItem("logoutMessage");
       }
     </script>
   </body>

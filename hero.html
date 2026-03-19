@@ -81,15 +81,12 @@
         transform: translateX(0) scale(1);
         opacity: 1;
       }
-
       .toast-success {
         background: rgba(40, 167, 69, 0.95);
       }
-
       .toast-delete {
         background: rgba(220, 53, 69, 0.95);
       }
-
       .toast-error {
         background: rgba(255, 193, 7, 0.95);
         color: black;
@@ -101,7 +98,6 @@
     <!-- 🔔 TOAST -->
     <div id="toast" class="toast-custom"></div>
 
-    <!-- SIDEBAR -->
     <div class="sidebar">
       <h4>Admin Panel</h4>
       <a href="admin.html">Dashboard</a>
@@ -111,7 +107,6 @@
       <a href="#" onclick="logout()" class="text-danger">Logout</a>
     </div>
 
-    <!-- MAIN -->
     <div class="main">
       <div class="d-flex justify-content-between mb-4">
         <h2>Hero Management</h2>
@@ -175,9 +170,14 @@
               id="deletePassword"
               class="form-control mb-2"
               placeholder="Enter password"
+              onkeydown="
+                if (event.key === 'Enter') {
+                  event.preventDefault();
+                  confirmDelete();
+                }
+              "
             />
 
-            <!-- 👁️ SHOW PASSWORD -->
             <div class="form-check">
               <input
                 class="form-check-input"
@@ -202,15 +202,16 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- 🔓 LOGOUT -->
     <script>
+      // 🔓 LOGOUT WITH NOTIFICATION
       function logout() {
-        localStorage.removeItem("isLoggedIn");
-        window.location.href = "login.html";
+        showToast("✅ Logged out successfully!", "success");
+        setTimeout(() => {
+          localStorage.removeItem("isLoggedIn");
+          window.location.href = "login.html";
+        }, 1200);
       }
-    </script>
 
-    <script>
       let heroes = [];
       let editIndex = null;
       let deleteIndex = null;
@@ -251,7 +252,7 @@
         const desc = descInput.value;
 
         if (!desc) {
-          showToast("Description required!", "error");
+          showToast("⚠️ Description required!", "error");
           return;
         }
 
@@ -262,10 +263,10 @@
 
             if (editIndex === null) {
               heroes.push({ image: img, desc });
-              showToast("Hero successfully created!", "success");
+              showToast("✅ Hero created!", "success");
             } else {
               heroes[editIndex] = { image: img, desc };
-              showToast("Hero updated!", "success");
+              showToast("✅ Hero updated!", "success");
             }
 
             renderTable();
@@ -273,7 +274,7 @@
           };
           reader.readAsDataURL(file);
         } else {
-          showToast("Image required!", "error");
+          showToast("⚠️ Image required!", "error");
         }
       }
 
@@ -288,6 +289,8 @@
         deleteIndex = index;
         deletePassword.value = "";
         deleteModal.show();
+
+        setTimeout(() => deletePassword.focus(), 300);
       }
 
       function confirmDelete() {
@@ -297,9 +300,9 @@
           heroes.splice(deleteIndex, 1);
           renderTable();
           deleteModal.hide();
-          showToast("Hero successfully deleted!", "delete");
+          showToast("🗑️ Hero deleted!", "delete");
         } else {
-          showToast("Wrong password!", "error");
+          showToast("⚠️ Wrong password!", "error");
         }
       }
 
@@ -310,23 +313,16 @@
 
       function showToast(message, type) {
         const toast = document.getElementById("toast");
-
         toast.className = "toast-custom";
 
         if (type === "success") toast.classList.add("toast-success");
         else if (type === "delete") toast.classList.add("toast-delete");
         else toast.classList.add("toast-error");
 
-        toast.innerHTML =
-          (type === "success" ? "✅" : type === "delete" ? "🗑️" : "⚠️") +
-          " " +
-          message;
+        toast.innerHTML = message;
 
         setTimeout(() => toast.classList.add("toast-show"), 50);
-
-        setTimeout(() => {
-          toast.classList.remove("toast-show");
-        }, 2500);
+        setTimeout(() => toast.classList.remove("toast-show"), 2500);
       }
     </script>
   </body>

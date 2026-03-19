@@ -10,7 +10,6 @@
       rel="stylesheet"
     />
 
-    <!-- 🔐 LOGIN CHECK -->
     <script>
       if (localStorage.getItem("isLoggedIn") !== "true") {
         window.location.href = "login.html";
@@ -64,40 +63,32 @@
         padding: 16px 22px;
         border-radius: 12px;
         color: white;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        backdrop-filter: blur(10px);
-        transform: translateX(120%) scale(0.9);
+        transform: translateX(120%);
         opacity: 0;
         transition: all 0.4s ease;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
         z-index: 9999;
       }
 
       .toast-show {
-        transform: translateX(0) scale(1);
+        transform: translateX(0);
         opacity: 1;
       }
       .toast-success {
-        background: rgba(40, 167, 69, 0.95);
+        background: green;
       }
       .toast-delete {
-        background: rgba(220, 53, 69, 0.95);
+        background: green;
       }
       .toast-error {
-        background: rgba(255, 193, 7, 0.95);
+        background: orange;
         color: black;
       }
     </style>
   </head>
 
   <body>
-    <!-- 🔔 TOAST -->
     <div id="toast" class="toast-custom"></div>
 
-    <!-- SIDEBAR -->
     <div class="sidebar">
       <h4>Admin Panel</h4>
       <a href="admin.html">Dashboard</a>
@@ -107,7 +98,6 @@
       <a href="#" class="text-danger" onclick="logout()">Logout</a>
     </div>
 
-    <!-- MAIN -->
     <div class="main">
       <div class="d-flex justify-content-between mb-4">
         <h2>Achievements Management</h2>
@@ -132,7 +122,7 @@
       </div>
     </div>
 
-    <!-- CREATE / EDIT MODAL -->
+    <!-- CREATE MODAL -->
     <div class="modal fade" id="achievementModal">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -182,7 +172,14 @@
               id="deletePassword"
               class="form-control mb-2"
               placeholder="Enter password"
+              onkeydown="
+                if (event.key === 'Enter') {
+                  event.preventDefault();
+                  confirmDelete();
+                }
+              "
             />
+
             <div class="form-check">
               <input
                 class="form-check-input"
@@ -208,10 +205,13 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-      // 🔓 LOGOUT
+      // 🔓 LOGOUT WITH NOTIFICATION
       function logout() {
-        localStorage.removeItem("isLoggedIn");
-        window.location.href = "login.html";
+        showToast("✅ Logged out successfully!", "success");
+        setTimeout(() => {
+          localStorage.removeItem("isLoggedIn");
+          window.location.href = "login.html";
+        }, 1200);
       }
 
       let achievements = [];
@@ -268,13 +268,15 @@
           const reader = new FileReader();
           reader.onload = function (e) {
             const img = e.target.result;
+
             if (editIndex === null) {
               achievements.push({ title, date, desc, image: img });
-              showToast("Achievement successfully created!", "success");
+              showToast("✅ Achievement created!", "success");
             } else {
               achievements[editIndex] = { title, date, desc, image: img };
-              showToast("Achievement updated!", "success");
+              showToast("✅ Achievement updated!", "success");
             }
+
             renderTable();
             modal.hide();
           };
@@ -297,15 +299,18 @@
         deleteIndex = index;
         deletePassword.value = "";
         deleteModal.show();
+
+        setTimeout(() => deletePassword.focus(), 300);
       }
 
       function confirmDelete() {
         const password = deletePassword.value;
+
         if (password === "admin123") {
           achievements.splice(deleteIndex, 1);
           renderTable();
           deleteModal.hide();
-          showToast("Achievement successfully deleted!", "delete");
+          showToast("Achievement deleted!", "delete");
         } else {
           showToast("Wrong password!", "error");
         }
@@ -319,14 +324,13 @@
       function showToast(message, type) {
         const toast = document.getElementById("toast");
         toast.className = "toast-custom";
+
         if (type === "success") toast.classList.add("toast-success");
         else if (type === "delete") toast.classList.add("toast-delete");
         else toast.classList.add("toast-error");
 
-        toast.innerHTML =
-          (type === "success" ? "✅" : type === "delete" ? "🗑️" : "⚠️") +
-          " " +
-          message;
+        toast.innerHTML = message;
+
         setTimeout(() => toast.classList.add("toast-show"), 50);
         setTimeout(() => toast.classList.remove("toast-show"), 2500);
       }
