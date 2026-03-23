@@ -10,18 +10,12 @@
       rel="stylesheet"
     />
 
-    <!-- 🔐 LOGIN CHECK -->
-    <script>
-      if (localStorage.getItem("isLoggedIn") !== "true") {
-        window.location.href = "login.html";
-      }
-    </script>
-
     <style>
       body {
         background: #f5f5f5;
       }
 
+      /* SIDEBAR */
       .sidebar {
         height: 100vh;
         background: #2f4f1f;
@@ -29,6 +23,8 @@
         position: fixed;
         width: 240px;
         padding: 25px;
+        transition: 0.3s;
+        z-index: 1000;
       }
 
       .sidebar a {
@@ -38,9 +34,27 @@
         text-decoration: none;
       }
 
+      /* ✅ OVERLAY ADDED */
+      #overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.4);
+        display: none;
+        z-index: 999;
+      }
+
+      #overlay.active {
+        display: block;
+      }
+
+      /* MAIN */
       .main {
         margin-left: 240px;
         padding: 40px;
+        transition: 0.3s;
       }
 
       .btn-green {
@@ -56,95 +70,176 @@
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
       }
 
-      /* 🔔 TOAST */
+      .text-truncate-custom {
+        max-width: 250px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      td {
+        word-break: break-word;
+      }
+
+      .mobile-cards {
+        display: none;
+      }
+
       .toast-custom {
         position: fixed;
         top: 20px;
         right: 20px;
-        padding: 16px 22px;
-        border-radius: 12px;
+        padding: 16px;
+        border-radius: 10px;
         color: white;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        backdrop-filter: blur(10px);
-        transform: translateX(120%) scale(0.9);
+        transform: translateX(120%);
         opacity: 0;
-        transition: all 0.4s ease;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-        z-index: 9999;
+        transition: 0.4s;
       }
 
       .toast-show {
-        transform: translateX(0) scale(1);
+        transform: translateX(0);
         opacity: 1;
       }
       .toast-success {
-        background: rgba(40, 167, 69, 0.95);
+        background: #28a745;
       }
       .toast-delete {
-        background: rgba(220, 53, 69, 0.95);
+        background: #dc3545;
       }
       .toast-error {
-        background: rgba(255, 193, 7, 0.95);
+        background: #ffc107;
         color: black;
+      }
+
+      /* 📱 RESPONSIVE */
+      @media (max-width: 768px) {
+        .sidebar {
+          left: -240px;
+        }
+
+        .sidebar.active {
+          left: 0;
+        }
+
+        .main {
+          margin-left: 0;
+          padding: 20px;
+        }
+
+        .table-responsive {
+          display: none;
+        }
+
+        .mobile-cards {
+          display: block;
+        }
+
+        .mobile-card {
+          background: white;
+          border-radius: 10px;
+          padding: 15px;
+          margin-bottom: 15px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .mobile-card img {
+          width: 100%;
+          border-radius: 8px;
+          margin-bottom: 10px;
+        }
+
+        .mobile-card button {
+          width: 100%;
+          margin-top: 5px;
+        }
+
+        .header-flex {
+          flex-direction: column;
+          align-items: stretch !important;
+        }
+
+        .header-flex button {
+          width: 100%;
+        }
       }
     </style>
   </head>
 
   <body>
-    <!-- 🔔 TOAST -->
     <div id="toast" class="toast-custom"></div>
+
+    <!-- ✅ OVERLAY -->
+    <div id="overlay" onclick="closeSidebar()"></div>
 
     <!-- SIDEBAR -->
     <div class="sidebar">
-      <h4>Admin Panel</h4>
-      <a href="admin.html">Dashboard</a>
-      <a href="hero.html">Hero</a>
-      <a href="products_admin.html">Products</a>
-      <a href="achievements_admin.html">Achievements</a>
+      <!-- ✅ HEADER WITH CLOSE BUTTON -->
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Admin Panel</h4>
+        <button
+          class="btn btn-sm btn-light d-md-none"
+          onclick="toggleSidebar()"
+        >
+          ✖
+        </button>
+      </div>
+
+      <!-- ✅ AUTO CLOSE ON CLICK -->
+      <a href="admin.html" onclick="closeSidebar()">Dashboard</a>
+      <a href="hero.html" onclick="closeSidebar()">Hero</a>
+      <a href="products_admin.html" onclick="closeSidebar()">Products</a>
+      <a href="achievements_admin.html" onclick="closeSidebar()"
+        >Achievements</a
+      >
       <a href="#" class="text-danger" onclick="logout()">Logout</a>
     </div>
 
     <!-- MAIN -->
     <div class="main">
-      <div class="d-flex justify-content-between mb-4">
+      <button class="btn btn-dark d-md-none mb-3" onclick="toggleSidebar()">
+        ☰ Menu
+      </button>
+
+      <div class="d-flex justify-content-between mb-4 header-flex">
         <h2>Products Management</h2>
         <button class="btn btn-green" onclick="openCreate()">
-          + Create New Product
+          + Add New Products
         </button>
       </div>
 
-      <div class="card card-box p-3">
-        <table class="table text-center align-middle">
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Description</th>
-              <th>Image</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="productTable"></tbody>
-        </table>
+      <div class="card p-3 card-box">
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+              <tr>
+                <th class="text-start">Title</th>
+                <th class="text-start">Description</th>
+                <th class="text-center">Image</th>
+                <th class="text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="productTable"></tbody>
+          </table>
+        </div>
+
+        <div id="mobileView" class="mobile-cards"></div>
       </div>
     </div>
 
-    <!-- CREATE MODAL -->
+    <!-- MODAL (UNCHANGED) -->
     <div class="modal fade" id="productModal">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 id="modalTitle">Create Product</h5>
+            <h5>Create Product</h5>
           </div>
 
           <div class="modal-body">
             <input
-              type="text"
               id="titleInput"
               class="form-control mb-2"
-              placeholder="Product Title"
+              placeholder="Title"
             />
             <textarea
               id="descInput"
@@ -164,87 +259,48 @@
       </div>
     </div>
 
-    <!-- DELETE MODAL -->
-    <div class="modal fade" id="deleteModal">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5>Enter Password to Delete</h5>
-          </div>
-
-          <div class="modal-body">
-            <input
-              type="password"
-              id="deletePassword"
-              class="form-control mb-2"
-              placeholder="Enter password"
-              onkeydown="
-                if (event.key === 'Enter') {
-                  event.preventDefault();
-                  confirmDelete();
-                }
-              "
-            />
-            <div class="form-check">
-              <input
-                class="form-check-input"
-                type="checkbox"
-                onclick="toggleDeletePassword()"
-              />
-              <label class="form-check-label">Show Password</label>
-            </div>
-          </div>
-
-          <div class="modal-footer">
-            <button class="btn btn-secondary" data-bs-dismiss="modal">
-              Cancel
-            </button>
-            <button class="btn btn-danger" onclick="confirmDelete()">
-              Delete
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-      // 🔓 LOGOUT WITH NOTIFICATION
-      function logout() {
-        showToast("✅ Logged out successfully!", "success");
-        setTimeout(() => {
-          localStorage.removeItem("isLoggedIn");
-          window.location.href = "login.html";
-        }, 1200);
-      }
-
       let products = [];
       let editIndex = null;
-      let deleteIndex = null;
 
       const modal = new bootstrap.Modal(
         document.getElementById("productModal"),
       );
-      const deleteModal = new bootstrap.Modal(
-        document.getElementById("deleteModal"),
-      );
+
+      function shortText(text, max = 60) {
+        return text.length > max ? text.substring(0, max) + "..." : text;
+      }
 
       function renderTable() {
         const table = document.getElementById("productTable");
-        table.innerHTML = "";
+        const mobile = document.getElementById("mobileView");
 
-        products.forEach((p, index) => {
+        table.innerHTML = "";
+        mobile.innerHTML = "";
+
+        products.forEach((p, i) => {
           table.innerHTML += `
             <tr>
-              <td><strong>${p.title}</strong></td>
-              <td>${p.desc}</td>
-              <td><img src="${p.image}" width="100"></td>
-              <td>
-                <button class="btn btn-sm btn-success" onclick="editProduct(${index})">Edit</button>
-                <button class="btn btn-sm btn-danger" onclick="askDelete(${index})">Delete</button>
+              <td class="text-start"><strong>${p.title}</strong></td>
+              <td class="text-start text-truncate-custom">${shortText(p.desc)}</td>
+              <td class="text-center"><img src="${p.image}" width="80"></td>
+              <td class="text-center">
+                <button class="btn btn-success btn-sm" onclick="editProduct(${i})">Edit</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteProduct(${i})">Delete</button>
               </td>
             </tr>
+          `;
+
+          mobile.innerHTML += `
+            <div class="mobile-card">
+              <img src="${p.image}">
+              <h5>${p.title}</h5>
+              <p>${shortText(p.desc)}</p>
+              <button class="btn btn-success btn-sm" onclick="editProduct(${i})">Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteProduct(${i})">Delete</button>
+            </div>
           `;
         });
       }
@@ -254,7 +310,6 @@
         titleInput.value = "";
         descInput.value = "";
         imageInput.value = "";
-        modalTitle.innerText = "Create Product";
         modal.show();
       }
 
@@ -263,77 +318,64 @@
         const desc = descInput.value.trim();
         const file = imageInput.files[0];
 
-        if (!title || !desc)
-          return showToast("⚠️ All fields required!", "error");
+        if (!title || !desc) return showToast("Fill all fields", "error");
 
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = function (e) {
-            const img = e.target.result;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          if (editIndex === null) {
+            products.push({ title, desc, image: e.target.result });
+          } else {
+            products[editIndex] = { title, desc, image: e.target.result };
+          }
 
-            if (editIndex === null) {
-              products.push({ title, desc, image: img });
-              showToast("✅ Product created!", "success");
-            } else {
-              products[editIndex] = { title, desc, image: img };
-              showToast("✅ Product updated!", "success");
-            }
+          renderTable();
+          modal.hide();
+          showToast("Saved!", "success");
+        };
 
-            renderTable();
-            modal.hide();
-          };
-          reader.readAsDataURL(file);
-        } else {
-          showToast("⚠️ Image required!", "error");
-        }
+        reader.readAsDataURL(file);
       }
 
-      function editProduct(index) {
-        editIndex = index;
-        titleInput.value = products[index].title;
-        descInput.value = products[index].desc;
-        modalTitle.innerText = "Edit Product";
+      function editProduct(i) {
+        editIndex = i;
+        titleInput.value = products[i].title;
+        descInput.value = products[i].desc;
         modal.show();
       }
 
-      function askDelete(index) {
-        deleteIndex = index;
-        deletePassword.value = "";
-        deleteModal.show();
-
-        setTimeout(() => deletePassword.focus(), 300);
+      function deleteProduct(i) {
+        products.splice(i, 1);
+        renderTable();
+        showToast("Deleted", "delete");
       }
 
-      function confirmDelete() {
-        const password = deletePassword.value;
-
-        if (password === "admin123") {
-          products.splice(deleteIndex, 1);
-          renderTable();
-          deleteModal.hide();
-          showToast("🗑️ Product deleted!", "delete");
-        } else {
-          showToast("⚠️ Wrong password!", "error");
-        }
+      /* ✅ UPDATED SIDEBAR CONTROL */
+      function toggleSidebar() {
+        document.querySelector(".sidebar").classList.toggle("active");
+        document.getElementById("overlay").classList.toggle("active");
       }
 
-      function toggleDeletePassword() {
-        const input = document.getElementById("deletePassword");
-        input.type = input.type === "password" ? "text" : "password";
+      function closeSidebar() {
+        document.querySelector(".sidebar").classList.remove("active");
+        document.getElementById("overlay").classList.remove("active");
       }
 
-      function showToast(message, type) {
-        const toast = document.getElementById("toast");
-        toast.className = "toast-custom";
+      function showToast(msg, type) {
+        const t = document.getElementById("toast");
+        t.className = "toast-custom";
 
-        if (type === "success") toast.classList.add("toast-success");
-        else if (type === "delete") toast.classList.add("toast-delete");
-        else toast.classList.add("toast-error");
+        if (type === "success") t.classList.add("toast-success");
+        else if (type === "delete") t.classList.add("toast-delete");
+        else t.classList.add("toast-error");
 
-        toast.innerHTML = message;
+        t.innerText = msg;
+        setTimeout(() => t.classList.add("toast-show"), 50);
+        setTimeout(() => t.classList.remove("toast-show"), 2000);
+      }
 
-        setTimeout(() => toast.classList.add("toast-show"), 50);
-        setTimeout(() => toast.classList.remove("toast-show"), 2500);
+      function logout() {
+        localStorage.removeItem("isLoggedIn");
+        location.href = "login.html";
       }
     </script>
   </body>

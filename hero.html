@@ -22,6 +22,7 @@
         background: #f5f5f5;
       }
 
+      /* SIDEBAR */
       .sidebar {
         height: 100vh;
         background: #2f4f1f;
@@ -29,6 +30,8 @@
         position: fixed;
         width: 240px;
         padding: 25px;
+        transition: 0.3s;
+        z-index: 1000;
       }
 
       .sidebar a {
@@ -38,9 +41,27 @@
         text-decoration: none;
       }
 
+      /* OVERLAY FOR MOBILE SIDEBAR */
+      #overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.4);
+        display: none;
+        z-index: 999;
+      }
+
+      #overlay.active {
+        display: block;
+      }
+
+      /* MAIN CONTENT */
       .main {
         margin-left: 240px;
         padding: 40px;
+        transition: 0.3s;
       }
 
       .btn-green {
@@ -57,7 +78,28 @@
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
       }
 
-      /* 🔔 TOAST */
+      /* MOBILE CARDS */
+      .mobile-cards {
+        display: none;
+      }
+      .mobile-card {
+        background: white;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      }
+      .mobile-card img {
+        width: 100%;
+        border-radius: 8px;
+        margin-bottom: 10px;
+      }
+      .mobile-card button {
+        width: 100%;
+        margin-top: 5px;
+      }
+
+      /* TOASTS */
       .toast-custom {
         position: fixed;
         top: 20px;
@@ -76,7 +118,6 @@
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
         z-index: 9999;
       }
-
       .toast-show {
         transform: translateX(0) scale(1);
         opacity: 1;
@@ -91,6 +132,34 @@
         background: rgba(255, 193, 7, 0.95);
         color: black;
       }
+
+      /* RESPONSIVE */
+      @media (max-width: 768px) {
+        .sidebar {
+          left: -240px;
+        }
+        .sidebar.active {
+          left: 0;
+        }
+        .main {
+          margin-left: 0;
+          padding: 20px;
+        }
+        .table-responsive {
+          display: none;
+        }
+        .mobile-cards {
+          display: block;
+        }
+        .header-flex {
+          flex-direction: column;
+          align-items: stretch !important;
+        }
+        .header-flex button {
+          width: 100%;
+          margin-top: 10px;
+        }
+      }
     </style>
   </head>
 
@@ -98,34 +167,57 @@
     <!-- 🔔 TOAST -->
     <div id="toast" class="toast-custom"></div>
 
+    <!-- OVERLAY -->
+    <div id="overlay" onclick="closeSidebar()"></div>
+
+    <!-- SIDEBAR -->
     <div class="sidebar">
-      <h4>Admin Panel</h4>
-      <a href="admin.html">Dashboard</a>
-      <a href="hero.html">Hero</a>
-      <a href="products_admin.html">Products</a>
-      <a href="achievements_admin.html">Achievements</a>
-      <a href="#" onclick="logout()" class="text-danger">Logout</a>
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Admin Panel</h4>
+        <button
+          class="btn btn-sm btn-light d-md-none"
+          onclick="toggleSidebar()"
+        >
+          ✖
+        </button>
+      </div>
+      <a href="admin.html" onclick="closeSidebar()">Dashboard</a>
+      <a href="hero.html" onclick="closeSidebar()">Hero</a>
+      <a href="products_admin.html" onclick="closeSidebar()">Products</a>
+      <a href="achievements_admin.html" onclick="closeSidebar()"
+        >Achievements</a
+      >
+      <a href="#" class="text-danger" onclick="logout()">Logout</a>
     </div>
 
+    <!-- MAIN -->
     <div class="main">
-      <div class="d-flex justify-content-between mb-4">
+      <button class="btn btn-dark d-md-none mb-3" onclick="toggleSidebar()">
+        ☰ Menu
+      </button>
+
+      <div class="d-flex justify-content-between mb-4 header-flex">
         <h2>Hero Management</h2>
         <button class="btn btn-green" onclick="openCreate()">
-          + Create New Hero
+          + Add New Hero
         </button>
       </div>
 
-      <div class="card card-box p-3">
-        <table class="table text-center align-middle">
-          <thead>
-            <tr>
-              <th>Image</th>
-              <th>Description</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="heroTable"></tbody>
-        </table>
+      <div class="card p-3 card-box">
+        <div class="table-responsive">
+          <table class="table text-center align-middle">
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Description</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="heroTable"></tbody>
+          </table>
+        </div>
+
+        <div id="mobileView" class="mobile-cards"></div>
       </div>
     </div>
 
@@ -136,7 +228,6 @@
           <div class="modal-header">
             <h5 id="modalTitle">Create Hero</h5>
           </div>
-
           <div class="modal-body">
             <input type="file" id="imageInput" class="form-control mb-3" />
             <textarea
@@ -145,7 +236,6 @@
               placeholder="Description"
             ></textarea>
           </div>
-
           <div class="modal-footer">
             <button class="btn btn-secondary" data-bs-dismiss="modal">
               Cancel
@@ -163,7 +253,6 @@
           <div class="modal-header">
             <h5>Enter Password to Delete</h5>
           </div>
-
           <div class="modal-body">
             <input
               type="password"
@@ -177,7 +266,6 @@
                 }
               "
             />
-
             <div class="form-check">
               <input
                 class="form-check-input"
@@ -187,7 +275,6 @@
               <label class="form-check-label">Show Password</label>
             </div>
           </div>
-
           <div class="modal-footer">
             <button class="btn btn-secondary" data-bs-dismiss="modal">
               Cancel
@@ -203,7 +290,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-      // 🔓 LOGOUT WITH NOTIFICATION
+      // LOGOUT WITH TOAST
       function logout() {
         showToast("✅ Logged out successfully!", "success");
         setTimeout(() => {
@@ -212,6 +299,17 @@
         }, 1200);
       }
 
+      // SIDEBAR TOGGLE
+      function toggleSidebar() {
+        document.querySelector(".sidebar").classList.toggle("active");
+        document.getElementById("overlay").classList.toggle("active");
+      }
+      function closeSidebar() {
+        document.querySelector(".sidebar").classList.remove("active");
+        document.getElementById("overlay").classList.remove("active");
+      }
+
+      // HERO MANAGEMENT
       let heroes = [];
       let editIndex = null;
       let deleteIndex = null;
@@ -223,9 +321,12 @@
 
       function renderTable() {
         const table = document.getElementById("heroTable");
+        const mobile = document.getElementById("mobileView");
         table.innerHTML = "";
+        mobile.innerHTML = "";
 
         heroes.forEach((hero, index) => {
+          // Table
           table.innerHTML += `
             <tr>
               <td><img src="${hero.image}" width="100"></td>
@@ -235,6 +336,15 @@
                 <button class="btn btn-sm btn-danger" onclick="askDelete(${index})">Delete</button>
               </td>
             </tr>
+          `;
+          // Mobile Card
+          mobile.innerHTML += `
+            <div class="mobile-card">
+              <img src="${hero.image}" />
+              <p>${hero.desc}</p>
+              <button class="btn btn-success btn-sm" onclick="editHero(${index})">Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="askDelete(${index})">Delete</button>
+            </div>
           `;
         });
       }
@@ -251,24 +361,19 @@
         const file = imageInput.files[0];
         const desc = descInput.value;
 
-        if (!desc) {
-          showToast("⚠️ Description required!", "error");
-          return;
-        }
+        if (!desc) return showToast("⚠️ Description required!", "error");
 
         if (file) {
           const reader = new FileReader();
           reader.onload = function (e) {
             const img = e.target.result;
-
             if (editIndex === null) {
               heroes.push({ image: img, desc });
-              showToast("✅ Hero created!", "success");
+              showToast("Hero Created Successfully!", "success");
             } else {
               heroes[editIndex] = { image: img, desc };
-              showToast("✅ Hero updated!", "success");
+              showToast("Hero Updated Successfully!", "success");
             }
-
             renderTable();
             modal.hide();
           };
@@ -289,13 +394,11 @@
         deleteIndex = index;
         deletePassword.value = "";
         deleteModal.show();
-
         setTimeout(() => deletePassword.focus(), 300);
       }
 
       function confirmDelete() {
         const password = deletePassword.value;
-
         if (password === "admin123") {
           heroes.splice(deleteIndex, 1);
           renderTable();
@@ -314,13 +417,10 @@
       function showToast(message, type) {
         const toast = document.getElementById("toast");
         toast.className = "toast-custom";
-
         if (type === "success") toast.classList.add("toast-success");
         else if (type === "delete") toast.classList.add("toast-delete");
         else toast.classList.add("toast-error");
-
         toast.innerHTML = message;
-
         setTimeout(() => toast.classList.add("toast-show"), 50);
         setTimeout(() => toast.classList.remove("toast-show"), 2500);
       }

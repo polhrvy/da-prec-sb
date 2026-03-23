@@ -10,6 +10,7 @@
       rel="stylesheet"
     />
 
+    <!-- 🔐 LOGIN CHECK -->
     <script>
       if (localStorage.getItem("isLoggedIn") !== "true") {
         window.location.href = "login.html";
@@ -21,6 +22,7 @@
         background: #f5f5f5;
       }
 
+      /* SIDEBAR */
       .sidebar {
         height: 100vh;
         background: #2f4f1f;
@@ -28,6 +30,8 @@
         position: fixed;
         width: 240px;
         padding: 25px;
+        transition: 0.3s;
+        z-index: 1000;
       }
 
       .sidebar a {
@@ -37,9 +41,27 @@
         text-decoration: none;
       }
 
+      /* OVERLAY */
+      #overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.4);
+        display: none;
+        z-index: 999;
+      }
+
+      #overlay.active {
+        display: block;
+      }
+
+      /* MAIN CONTENT */
       .main {
         margin-left: 240px;
         padding: 40px;
+        transition: 0.3s;
       }
 
       .btn-green {
@@ -55,7 +77,28 @@
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
       }
 
-      /* 🔔 TOAST */
+      /* MOBILE CARDS */
+      .mobile-cards {
+        display: none;
+      }
+      .mobile-card {
+        background: white;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      }
+      .mobile-card img {
+        width: 100%;
+        border-radius: 8px;
+        margin-bottom: 10px;
+      }
+      .mobile-card button {
+        width: 100%;
+        margin-top: 5px;
+      }
+
+      /* TOASTS */
       .toast-custom {
         position: fixed;
         top: 20px;
@@ -63,62 +106,118 @@
         padding: 16px 22px;
         border-radius: 12px;
         color: white;
-        transform: translateX(120%);
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        backdrop-filter: blur(10px);
+        transform: translateX(120%) scale(0.9);
         opacity: 0;
         transition: all 0.4s ease;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
         z-index: 9999;
       }
-
       .toast-show {
-        transform: translateX(0);
+        transform: translateX(0) scale(1);
         opacity: 1;
       }
       .toast-success {
-        background: green;
+        background: rgba(40, 167, 69, 0.95);
       }
       .toast-delete {
-        background: green;
+        background: rgba(220, 53, 69, 0.95);
       }
       .toast-error {
-        background: orange;
+        background: rgba(255, 193, 7, 0.95);
         color: black;
+      }
+
+      /* RESPONSIVE */
+      @media (max-width: 768px) {
+        .sidebar {
+          left: -240px;
+        }
+        .sidebar.active {
+          left: 0;
+        }
+        .main {
+          margin-left: 0;
+          padding: 20px;
+        }
+        .table-responsive {
+          display: none;
+        }
+        .mobile-cards {
+          display: block;
+        }
+        .header-flex {
+          flex-direction: column;
+          align-items: stretch !important;
+        }
+        .header-flex button {
+          width: 100%;
+          margin-top: 10px;
+        }
       }
     </style>
   </head>
 
   <body>
+    <!-- TOAST -->
     <div id="toast" class="toast-custom"></div>
 
+    <!-- OVERLAY -->
+    <div id="overlay" onclick="closeSidebar()"></div>
+
+    <!-- SIDEBAR -->
     <div class="sidebar">
-      <h4>Admin Panel</h4>
-      <a href="admin.html">Dashboard</a>
-      <a href="hero.html">Hero</a>
-      <a href="products_admin.html">Products</a>
-      <a href="achievements_admin.html">Achievements</a>
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Admin Panel</h4>
+        <button
+          class="btn btn-sm btn-light d-md-none"
+          onclick="toggleSidebar()"
+        >
+          ✖
+        </button>
+      </div>
+      <a href="admin.html" onclick="closeSidebar()">Dashboard</a>
+      <a href="hero.html" onclick="closeSidebar()">Hero</a>
+      <a href="products_admin.html" onclick="closeSidebar()">Products</a>
+      <a href="achievements_admin.html" onclick="closeSidebar()"
+        >Achievements</a
+      >
       <a href="#" class="text-danger" onclick="logout()">Logout</a>
     </div>
 
+    <!-- MAIN -->
     <div class="main">
-      <div class="d-flex justify-content-between mb-4">
+      <button class="btn btn-dark d-md-none mb-3" onclick="toggleSidebar()">
+        ☰ Menu
+      </button>
+
+      <div class="d-flex justify-content-between mb-4 header-flex">
         <h2>Achievements Management</h2>
         <button class="btn btn-green" onclick="openCreate()">
-          + Create New Achievement
+          + Add New Achievement
         </button>
       </div>
 
-      <div class="card card-box p-3">
-        <table class="table text-center align-middle">
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Date</th>
-              <th>Description</th>
-              <th>Image</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="achievementTable"></tbody>
-        </table>
+      <div class="card p-3 card-box">
+        <div class="table-responsive">
+          <table class="table text-center align-middle">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Image</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="achievementTable"></tbody>
+          </table>
+        </div>
+        <div id="mobileView" class="mobile-cards"></div>
       </div>
     </div>
 
@@ -129,7 +228,6 @@
           <div class="modal-header">
             <h5 id="modalTitle">Create Achievement</h5>
           </div>
-
           <div class="modal-body">
             <input
               type="text"
@@ -145,7 +243,6 @@
             ></textarea>
             <input type="file" id="imageInput" class="form-control" />
           </div>
-
           <div class="modal-footer">
             <button class="btn btn-secondary" data-bs-dismiss="modal">
               Cancel
@@ -162,10 +259,7 @@
     <div class="modal fade" id="deleteModal">
       <div class="modal-dialog">
         <div class="modal-content">
-          <div class="modal-header">
-            <h5>Enter Password to Delete</h5>
-          </div>
-
+          <div class="modal-header"><h5>Enter Password to Delete</h5></div>
           <div class="modal-body">
             <input
               type="password"
@@ -179,7 +273,6 @@
                 }
               "
             />
-
             <div class="form-check">
               <input
                 class="form-check-input"
@@ -189,7 +282,6 @@
               <label class="form-check-label">Show Password</label>
             </div>
           </div>
-
           <div class="modal-footer">
             <button class="btn btn-secondary" data-bs-dismiss="modal">
               Cancel
@@ -205,7 +297,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-      // 🔓 LOGOUT WITH NOTIFICATION
+      // LOGOUT
       function logout() {
         showToast("✅ Logged out successfully!", "success");
         setTimeout(() => {
@@ -214,6 +306,17 @@
         }, 1200);
       }
 
+      // SIDEBAR
+      function toggleSidebar() {
+        document.querySelector(".sidebar").classList.toggle("active");
+        document.getElementById("overlay").classList.toggle("active");
+      }
+      function closeSidebar() {
+        document.querySelector(".sidebar").classList.remove("active");
+        document.getElementById("overlay").classList.remove("active");
+      }
+
+      // ACHIEVEMENTS
       let achievements = [];
       let editIndex = null;
       let deleteIndex = null;
@@ -227,9 +330,11 @@
 
       function renderTable() {
         const table = document.getElementById("achievementTable");
+        const mobile = document.getElementById("mobileView");
         table.innerHTML = "";
+        mobile.innerHTML = "";
 
-        achievements.forEach((a, index) => {
+        achievements.forEach((a, i) => {
           table.innerHTML += `
             <tr>
               <td><strong>${a.title}</strong></td>
@@ -237,10 +342,20 @@
               <td>${a.desc}</td>
               <td><img src="${a.image}" width="100"></td>
               <td>
-                <button class="btn btn-sm btn-success" onclick="editAchievement(${index})">Edit</button>
-                <button class="btn btn-sm btn-danger" onclick="askDelete(${index})">Delete</button>
+                <button class="btn btn-sm btn-success" onclick="editAchievement(${i})">Edit</button>
+                <button class="btn btn-sm btn-danger" onclick="askDelete(${i})">Delete</button>
               </td>
             </tr>
+          `;
+
+          mobile.innerHTML += `
+            <div class="mobile-card">
+              <img src="${a.image}" />
+              <p><strong>${a.title}</strong> (${a.date})</p>
+              <p>${a.desc}</p>
+              <button class="btn btn-success btn-sm" onclick="editAchievement(${i})">Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="askDelete(${i})">Delete</button>
+            </div>
           `;
         });
       }
@@ -268,7 +383,6 @@
           const reader = new FileReader();
           reader.onload = function (e) {
             const img = e.target.result;
-
             if (editIndex === null) {
               achievements.push({ title, date, desc, image: img });
               showToast("✅ Achievement created!", "success");
@@ -276,7 +390,6 @@
               achievements[editIndex] = { title, date, desc, image: img };
               showToast("✅ Achievement updated!", "success");
             }
-
             renderTable();
             modal.hide();
           };
@@ -286,27 +399,24 @@
         }
       }
 
-      function editAchievement(index) {
-        editIndex = index;
-        titleInput.value = achievements[index].title;
-        dateInput.value = achievements[index].date;
-        descInput.value = achievements[index].desc;
+      function editAchievement(i) {
+        editIndex = i;
+        titleInput.value = achievements[i].title;
+        dateInput.value = achievements[i].date;
+        descInput.value = achievements[i].desc;
         modalTitle.innerText = "Edit Achievement";
         modal.show();
       }
 
-      function askDelete(index) {
-        deleteIndex = index;
+      function askDelete(i) {
+        deleteIndex = i;
         deletePassword.value = "";
         deleteModal.show();
-
         setTimeout(() => deletePassword.focus(), 300);
       }
 
       function confirmDelete() {
-        const password = deletePassword.value;
-
-        if (password === "admin123") {
+        if (deletePassword.value === "admin123") {
           achievements.splice(deleteIndex, 1);
           renderTable();
           deleteModal.hide();
@@ -317,22 +427,19 @@
       }
 
       function toggleDeletePassword() {
-        const input = document.getElementById("deletePassword");
-        input.type = input.type === "password" ? "text" : "password";
+        deletePassword.type =
+          deletePassword.type === "password" ? "text" : "password";
       }
 
-      function showToast(message, type) {
-        const toast = document.getElementById("toast");
-        toast.className = "toast-custom";
-
-        if (type === "success") toast.classList.add("toast-success");
-        else if (type === "delete") toast.classList.add("toast-delete");
-        else toast.classList.add("toast-error");
-
-        toast.innerHTML = message;
-
-        setTimeout(() => toast.classList.add("toast-show"), 50);
-        setTimeout(() => toast.classList.remove("toast-show"), 2500);
+      function showToast(msg, type) {
+        const t = document.getElementById("toast");
+        t.className = "toast-custom";
+        if (type === "success") t.classList.add("toast-success");
+        else if (type === "delete") t.classList.add("toast-delete");
+        else t.classList.add("toast-error");
+        t.innerText = msg;
+        setTimeout(() => t.classList.add("toast-show"), 50);
+        setTimeout(() => t.classList.remove("toast-show"), 2500);
       }
     </script>
   </body>
